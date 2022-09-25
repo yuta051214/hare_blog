@@ -42,31 +42,32 @@ class PostController extends Controller
         $post->user_id = $request->user()->id;      // Auth()->user()->id、Auth::id() でもOK！
 
         $file = $request->file('image');
-        $post->image = date('YmdHis').'_'.$file->getClientOriginalName();
+        $post->image = date('YmdHis') . '_' . $file->getClientOriginalName();
 
 
         // トランザクションの開始
         DB::beginTransaction();
-        try{
+        try {
             // 画像の登録
             $post->save();
 
             //  画像のアップロード
-            if(!Storage::putFileAs('images/posts', $file, $post->image)){
+            if (!Storage::putFileAs('images/posts', $file, $post->image)) {
                 // 例外を発生させてロールバックする
                 throw new \Exception('画像ファイルの保存に失敗しました。');
             }
 
             // トランザクションの終了
             DB::commit();
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // トランザクションの失敗(終了)
             DB::rollback();
             return back()->withInput()->withErrors($e->getMessage());
         }
 
-        return redirect()->route('posts.show', $post);
+        return redirect()
+            ->route('posts.show', $post)
+            ->with('notice', '記事を登録しました');     // フラッシュメッセージ（セッションを利用してリダイレクト先にメッセージを渡す)：with('メッセージのkey', 'メッセージの値')
     }
 
     /**
