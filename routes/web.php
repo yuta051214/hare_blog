@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,11 +22,16 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
+
 Route::resource('posts', PostController::class)
     ->only(['create', 'store', 'edit', 'update', 'destroy'])
     ->middleware('auth');
 
 Route::resource('posts', PostController::class)
     ->only(['index', 'show']);
+
+Route::resource('posts.comments', CommentController::class)
+    ->only('create', 'store', 'update', 'edit', 'destroy')
+    ->middleware('auth');
 
 require __DIR__.'/auth.php';
